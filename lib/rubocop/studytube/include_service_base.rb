@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Rubocop
+module RuboCop
   module Cop
-    module Style
+    module Studytube
       # please include ServiceBase into a service class
       #
       # @example
@@ -19,11 +19,13 @@ module Rubocop
       #     def call
       #     end
       #   end
-      class IncludeServiceBase < RuboCop::Cop::Cop
+      class IncludeServiceBase < Base
         MSG = 'please include ServiceBase into a service class'
 
-        def_node_search :include_declarations, '(send nil? :include (:const nil? $_) ...)'
+        def_node_search :include_declarations, '(send nil? :include (:const ... $_) ...)'
         def_node_search :super_class_declarations, '(class (const nil? _) (const ...) ...)'
+        def_node_search :instance_call_declarations, '(def :call ...)'
+        def_node_search :class_call_declarations, '(defs (self) :call ...)'
 
         def on_class(node)
           return if super_class_declarations(node).any?
@@ -32,7 +34,7 @@ module Rubocop
             current.to_s.eql?('ServiceBase')
           end
 
-          add_offense(node)
+          add_offense(node) if instance_call_declarations(node).any? || class_call_declarations(node).any?
         end
       end
     end
