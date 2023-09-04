@@ -11,6 +11,14 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
         end
       end
     RUBY
+
+    expect_correction(<<~RUBY)
+    class AnyService
+        include ServiceBase
+        def call
+        end
+      end
+    RUBY
   end
 
   it 'registers an offense when using class has #call' do
@@ -47,14 +55,14 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
 
   it 'does not register an offense when no call methods' do
     expect_no_offenses(<<~RUBY)
-      class AnyService#{'  '}
+      class AnyService
       end
     RUBY
   end
 
   it 'does not register an offense when there is parent class' do
     expect_no_offenses(<<~RUBY)
-      class AnyService < ParentService#{' '}
+      class AnyService < ParentService
         def call
         end
       end
