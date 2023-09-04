@@ -15,17 +15,30 @@ GEM
       tzinfo (~> 2.0)
     ast (2.4.2)
     concurrent-ruby (1.2.2)
+    debug (1.8.0)
+      irb (>= 1.5.0)
+      reline (>= 0.3.1)
     diff-lcs (1.5.0)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
+    io-console (0.6.0)
+    irb (1.8.0)
+      rdoc (~> 6.5)
+      reline (>= 0.3.6)
     json (2.6.3)
     minitest (5.18.0)
     parallel (1.23.0)
     parser (3.2.2.1)
       ast (~> 2.4.1)
+    psych (5.1.0)
+      stringio
     rainbow (3.1.1)
     rake (13.0.6)
+    rdoc (6.5.0)
+      psych (>= 4.0.0)
     regexp_parser (2.8.0)
+    reline (0.3.8)
+      io-console (~> 0.5)
     rexml (3.2.5)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
@@ -57,6 +70,7 @@ GEM
       bundler
       rubocop (>= 1.22.0)
     ruby-progressbar (1.13.0)
+    stringio (3.0.8)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.4.2)
@@ -65,6 +79,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  debug
   rspec
   rubocop
   rubocop-extension-generator
