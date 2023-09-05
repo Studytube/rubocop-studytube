@@ -13,7 +13,7 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
     RUBY
 
     expect_correction(<<~RUBY)
-    class AnyService
+      class AnyService
         include ServiceBase
         def call
         end
@@ -25,6 +25,14 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
     expect_offense(<<~RUBY)
       class AnyService
       ^^^^^^^^^^^^^^^^ please include ServiceBase into a service class
+        def call
+        end
+      end
+    RUBY
+    
+    expect_correction(<<~RUBY)
+      class AnyService
+        include ServiceBase
         def call
         end
       end
@@ -68,4 +76,22 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       end
     RUBY
   end
+
+  it 'does not register an offense when there call method with args' do
+    expect_no_offenses(<<~RUBY)
+      class AnyService
+        def call(args)
+        end
+      end
+    RUBY
+  end
+
+  it 'does not register an offense when there call method with args' do
+    expect_no_offenses(<<~RUBY)
+      class AnyService
+        def self.call(args)
+        end
+      end
+    RUBY
+  end  
 end
