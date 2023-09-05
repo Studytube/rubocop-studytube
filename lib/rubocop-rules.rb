@@ -2,4 +2,4 @@
 
 require 'rubocop'
 
-require_relative 'rubocop/studytube/include_service_base'
+require_relative 'rubocop/cop/studytube/include_service_base'

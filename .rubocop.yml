@@ -1,0 +1,12 @@
+require:
+  - ./lib/rubocop/cop/studytube/include_service_base
+  
+AllCops:
+  NewCops: disable
+  Exclude: 
+    - 'examples/**/*'
+
+Studytube/IncludeServiceBase:
+  Enabled: false
+  Include: 
+    - 'examples/**/*'  

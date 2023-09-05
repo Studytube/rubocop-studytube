@@ -1,1 +1,4 @@
 .vscode
+.rspec*
+.tool-versions
+

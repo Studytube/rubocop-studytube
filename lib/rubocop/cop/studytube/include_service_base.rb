@@ -26,10 +26,12 @@ module RuboCop
 
         def_node_search :include_declarations, '(send nil? :include (:const ... $_) ...)'
         def_node_matcher :super_class_declarations, '(class (const nil? _) (const ...) ...)'
-        def_node_matcher :instance_call_declarations, '(def :call (args) nil?)'
-        def_node_matcher :class_call_declarations, '(defs (self) :call (args) nil?)'
+        def_node_matcher :instance_call_declarations, '(def :call (args) ...)'
+        def_node_matcher :class_call_declarations, '(defs (self) :call (args) ...)'
 
         def on_defs(node)
+          # require 'debug'
+          # debugger
           class_node = class_node(node)
 
           return unless class_node
@@ -75,9 +77,7 @@ module RuboCop
         end
 
         def class_node(node)
-          return unless node.parent.class_type? 
-          
-          node.parent
+          node.each_ancestor(:class).first
         end
       end
     end

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rubocop-rules (0.0.1)
+    rubocop-rules (0.0.3)
       rake
       rubocop (~> 1.45.1)
 

@@ -93,5 +93,22 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
         end
       end
     RUBY
-  end  
+  end
+
+  it 'todo' do
+    expect_offense(<<~RUBY)
+    class AnyService
+    ^^^^^^^^^^^^^^^^ please include ServiceBase into a service class
+      attr_reader :params
+    
+      def initialize(params)
+        @params = params
+      end
+    
+      def self.call
+        puts '1'
+      end
+    end
+    RUBY
+  end
 end
