@@ -30,8 +30,6 @@ module RuboCop
         def_node_matcher :class_call_declarations, '(defs (self) :call (args) ...)'
 
         def on_defs(node)
-          # require 'debug'
-          # debugger
           class_node = class_node(node)
 
           return unless class_node
@@ -45,7 +43,7 @@ module RuboCop
           # no `include ServiceBase` + `self.call`
           if !include_service_base?(class_node) && class_call_declarations(node)
             add_offense(class_node) do |corrector|
-              corrector.insert_after(class_node.child_nodes.first, "\n#{' ' * node.source_range.column}include ServiceBase")
+              add_servicebase(corrector, class_node)
               corrector.replace(node.child_nodes.first, '') # removes `self`
               corrector.replace(node.loc.operator, '') # removes `.`
             end
@@ -78,6 +76,29 @@ module RuboCop
 
         def class_node(node)
           node.each_ancestor(:class).first
+        end
+
+        def add_servicebase(corrector, node)
+
+          target_node = first_include_node(node) 
+          
+          if target_node
+            indent = ' ' * target_node.source_range.column
+            corrector.insert_before(target_node, "include ServiceBase\n#{indent}")
+            return
+          end
+
+          target_node = node.child_nodes.first
+          indent = ' ' * node.each_descendant(:def, :defs).first.source_range.column
+          corrector.insert_after(target_node, "\n#{indent}include ServiceBase\n")
+        end
+
+        def first_include_node(node)
+          node.each_descendant(:send) do |child_node|
+            return child_node if child_node.children[1] == :include
+          end
+          
+          nil
         end
       end
     end
