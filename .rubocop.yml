@@ -15,3 +15,9 @@ Studytube/IncludeServiceBase:
   Enabled: false
   Include: 
     - 'examples/**/*'  
+
+Naming/FileName:
+  Enabled: true
+  Exclude:
+    - "rubocop-rules.gemspec"
+    - "lib/rubocop-rules.rb"
