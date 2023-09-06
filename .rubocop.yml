@@ -5,7 +5,12 @@ AllCops:
   NewCops: disable
   Exclude: 
     - 'examples/**/*'
-
+Metrics/BlockLength:
+  Max: 200
+Metrics/AbcSize:
+  Max: 20
+Metrics/MethodLength:
+  Max: 80
 Studytube/IncludeServiceBase:
   Enabled: false
   Include: 

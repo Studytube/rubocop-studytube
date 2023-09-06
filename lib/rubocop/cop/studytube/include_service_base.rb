@@ -36,19 +36,18 @@ module RuboCop
           return if super_class_declarations(class_node) # skip if class has parent declaration
 
           # `include ServiceBase` + `def self.call`
-          if include_service_base?(class_node) && class_call_declarations(node) 
+          if include_service_base?(class_node) && class_call_declarations(node)
             add_offense(node, message: 'You have to use `def call`')
           end
 
           # no `include ServiceBase` + `self.call`
-          if !include_service_base?(class_node) && class_call_declarations(node)
-            add_offense(class_node) do |corrector|
-              add_servicebase(corrector, class_node)
-              corrector.replace(node.child_nodes.first, '') # removes `self`
-              corrector.replace(node.loc.operator, '') # removes `.`
-            end
-          end
+          return unless !include_service_base?(class_node) && class_call_declarations(node)
 
+          add_offense(class_node) do |corrector|
+            add_servicebase(corrector, class_node)
+            corrector.replace(node.child_nodes.first, '') # removes `self`
+            corrector.replace(node.loc.operator, '') # removes `.`
+          end
         end
 
         def on_def(node)
@@ -61,10 +60,11 @@ module RuboCop
           return unless instance_call_declarations(node)
 
           # no `include ServiceBase`
-          unless include_service_base?(class_node) 
-            add_offense(class_node) do |corrector|
-              corrector.insert_after(class_node.child_nodes.first, "\n#{' ' * node.source_range.column}include ServiceBase")
-            end
+          return if include_service_base?(class_node)
+
+          add_offense(class_node) do |corrector|
+            corrector.insert_after(class_node.child_nodes.first,
+                                   "\n#{' ' * node.source_range.column}include ServiceBase")
           end
         end
 
@@ -79,9 +79,8 @@ module RuboCop
         end
 
         def add_servicebase(corrector, node)
+          target_node = first_include_node(node)
 
-          target_node = first_include_node(node) 
-          
           if target_node
             indent = ' ' * target_node.source_range.column
             corrector.insert_before(target_node, "include ServiceBase\n#{indent}")
@@ -97,7 +96,7 @@ module RuboCop
           node.each_descendant(:send) do |child_node|
             return child_node if child_node.children[1] == :include
           end
-          
+
           nil
         end
       end
