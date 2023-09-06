@@ -45,7 +45,7 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       RUBY
     end
 
-    it 'without ServiceBase' do
+    it do
       expect_offense(<<~RUBY)
         class AnyService
         ^^^^^^^^^^^^^^^^ please include ServiceBase into a service class
@@ -57,13 +57,14 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       expect_correction(<<~RUBY)
         class AnyService
           include ServiceBase
+
           def call
           end
         end
       RUBY
     end
 
-    it 'with attr_reader and without Servicebase' do
+    it do
       expect_offense(<<~RUBY)
         class AnyService
         ^^^^^^^^^^^^^^^^ please include ServiceBase into a service class
@@ -78,11 +79,27 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
           end
         end
       RUBY
+
+      expect_correction(<<~RUBY)
+        class AnyService
+          include ServiceBase
+
+          attr_reader :params
+
+          def initialize(params)
+            @params = params
+          end
+
+          def call
+            puts '1'
+          end
+        end
+      RUBY
     end
   end
 
   context 'without offense' do
-    it 'with include ServiceBase' do
+    it do
       expect_no_offenses(<<~RUBY)
         class AnyService
           include ServiceBase
@@ -93,7 +110,7 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       RUBY
     end
 
-    it 'with include ::ServiceBase' do
+    it do
       expect_no_offenses(<<~RUBY)
         class AnyService
           include ::ServiceBase
@@ -104,14 +121,14 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       RUBY
     end
 
-    it 'without ServiceBase and call method' do
+    it do
       expect_no_offenses(<<~RUBY)
         class AnyService
         end
       RUBY
     end
 
-    it 'when class has parent class' do
+    it do
       expect_no_offenses(<<~RUBY)
         class AnyService < ParentService
           def call
@@ -120,7 +137,7 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       RUBY
     end
 
-    it 'when call method has args' do
+    it do
       expect_no_offenses(<<~RUBY)
         class AnyService
           def call(args)
@@ -129,12 +146,23 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
       RUBY
     end
 
-    it 'when self.call has args' do
+    it do
       expect_no_offenses(<<~RUBY)
         class AnyService
           def self.call(args)
+            puts "hello"
           end
         end
+      RUBY
+    end
+
+    it do
+      expect_no_offenses(<<~RUBY)
+      class AnyService
+        def self.call
+          new(arg).call
+        end
+      end
       RUBY
     end
   end

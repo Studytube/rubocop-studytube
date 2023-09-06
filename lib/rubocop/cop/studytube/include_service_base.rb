@@ -27,21 +27,28 @@ module RuboCop
         def_node_search :include_declarations, '(send nil? :include (:const ... $_) ...)'
         def_node_matcher :super_class_declarations, '(class (const nil? _) (const ...) ...)'
         def_node_matcher :instance_call_declarations, '(def :call (args) ...)'
-        def_node_matcher :class_call_declarations, '(defs (self) :call (args) ...)'
+        def_node_matcher :self_call_with_arg_declaration, '(defs self :call (args _ ...) ...)'
+        def_node_matcher :self_call_declaration, '(defs self :call (args) ...)'
 
         def on_defs(node)
           class_node = class_node(node)
 
           return unless class_node
           return if super_class_declarations(class_node) # skip if class has parent declaration
-
-          # `include ServiceBase` + `def self.call`
-          if include_service_base?(class_node) && class_call_declarations(node)
-            add_offense(node, message: 'You have to use `def call`')
+          return if self_call_with_arg_declaration(node) # skip if self.call has arguments
+          
+          # no `include ServiceBase` + `def self.call`
+          if !include_service_base?(class_node) && self_call_declaration(node)
+            add_offense(class_node) do |corrector|
+              add_servicebase(corrector, class_node)
+              corrector.replace(node.child_nodes.first, '') # removes `self`
+              corrector.replace(node.loc.operator, '') # removes `.`
+            end
+            return
           end
 
           # no `include ServiceBase` + `self.call`
-          return unless !include_service_base?(class_node) && class_call_declarations(node)
+          return unless !include_service_base?(class_node) && self_call_with_arg_declaration(node)
 
           add_offense(class_node) do |corrector|
             add_servicebase(corrector, class_node)
@@ -59,12 +66,11 @@ module RuboCop
           # no `def call`
           return unless instance_call_declarations(node)
 
-          # no `include ServiceBase`
+          # has already `include ServiceBase`
           return if include_service_base?(class_node)
 
           add_offense(class_node) do |corrector|
-            corrector.insert_after(class_node.child_nodes.first,
-                                   "\n#{' ' * node.source_range.column}include ServiceBase")
+            add_servicebase(corrector, class_node)
           end
         end
 
