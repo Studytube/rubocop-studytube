@@ -26,62 +26,40 @@ module RuboCop
 
         def_node_search :include_declarations, '(send nil? :include (:const ... $_) ...)'
         def_node_matcher :super_class_declarations, '(class (const nil? _) (const ...) ...)'
-        def_node_matcher :instance_call_declaration, '(def :call (args) ...)'
-        def_node_matcher :self_call_with_arg_declaration, '(defs self :call (args _ ...) ...)'
-        def_node_matcher :self_call_declaration, '(defs self :call (args) ...)'
-        def_node_search :nested_constructors_with_arg, '(send (send nil? :new (send _ ...)) :call)'
+        def_node_search :instance_call_declarations, '(def :call (args) ...)'
+        def_node_search :self_call_with_arg_declaration, '(defs self :call (args _ ...) ...)'
+        def_node_search :self_call_declarations, '(defs self :call (args) ...)'
+        def_node_search :self_call_with_nested_constructors_with_arg,
+                        '(defs self :call (args) (send (send nil? :new _ ...) :call))'
+        def_node_search :self_call_with_nested_constructors, '(defs self :call (args) (send (send nil? :new) :call))'
+        def_node_search :include_service_base, '(send nil? :include (const _ :ServiceBase))'
 
-        def on_defs(node)
-          class_node = class_node(node)
+        def on_class(node)
+          return if super_class_declarations(node) # skip if class has parent declaration
+          return if self_call_with_arg_declaration(node).any? # skip if self.call has arguments
+          return if include_service_base(node).any? # skip if class already includes ServiceBase
+          return if self_call_with_nested_constructors_with_arg(node).any?
 
-          return unless class_node
-          return if super_class_declarations(class_node) # skip if class has parent declaration
-          return if self_call_with_arg_declaration(node) # skip if self.call has arguments
-          return if include_service_base?(class_node)
-          return if nested_constructors_with_arg(node).any?
+          if instance_call_declarations(node).any? && self_call_with_nested_constructors(node).any?
+            add_offense(node) do |corrector|
+              add_servicebase(corrector, node)
+              corrector.remove(self_call_with_nested_constructors(node).first)
+            end
 
-          # # `def self.call`
-          # if self_call_declaration(node)
-          #   add_offense(class_node) do |corrector|
-          #     add_servicebase(corrector, class_node)
-          #     corrector.replace(node.child_nodes.first, '') # removes `self`
-          #     corrector.replace(node.loc.operator, '') # removes `.`
-          #   end
-          #   return
-          # end
-
-          add_offense(class_node) do |corrector|
-            add_servicebase(corrector, class_node)
-            corrector.replace(node.child_nodes.first, '') # removes `self`
-            corrector.replace(node.loc.operator, '') # removes `.`
+            return
           end
-        end
 
-        def on_def(node)
-          class_node = class_node(node)
+          return unless instance_call_declarations(node).any? || self_call_declarations(node).any?
 
-          return unless class_node
-          return if super_class_declarations(class_node) # skip if class has parent declaration
+          add_offense(node) do |corrector|
+            add_servicebase(corrector, node)
+            if self_call_declarations(node).any?
+              self_call_node = self_call_declarations(node).first
 
-          # no `def call`
-          return unless instance_call_declaration(node)
-
-          # has already `include ServiceBase`
-          return if include_service_base?(class_node)
-
-          add_offense(class_node) do |corrector|
-            add_servicebase(corrector, class_node)
+              corrector.replace(self_call_node.child_nodes.first, '') # removes `self`
+              corrector.replace(self_call_node.loc.operator, '') # removes `.`
+            end
           end
-        end
-
-        def include_service_base?(node)
-          include_declarations(node).any? do |current|
-            current.to_s.eql?('ServiceBase')
-          end
-        end
-
-        def class_node(node)
-          node.each_ancestor(:class).first
         end
 
         def add_servicebase(corrector, node)

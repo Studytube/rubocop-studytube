@@ -113,10 +113,13 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
 
       expect_correction(<<~RUBY)
         class AnyService
-          
+          include ServiceBase
+
           def call
             puts('123')
           end
+
+        #{'  '}
         end
       RUBY
     end
@@ -182,11 +185,11 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
 
     it do
       expect_no_offenses(<<~RUBY)
-      class AnyService
-        def self.call
-          new(arg).call
+        class AnyService
+          def self.call
+            new(arg).call
+          end
         end
-      end
       RUBY
     end
   end
