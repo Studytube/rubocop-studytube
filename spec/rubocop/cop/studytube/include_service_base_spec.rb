@@ -119,7 +119,7 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
             puts('123')
           end
 
-        #{'  '}
+          
         end
       RUBY
     end

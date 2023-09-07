@@ -43,7 +43,7 @@ module RuboCop
           if instance_call_declarations(node).any? && self_call_with_nested_constructors(node).any?
             add_offense(node) do |corrector|
               add_servicebase(corrector, node)
-              corrector.remove(self_call_with_nested_constructors(node).first)
+              corrector.remove(self_call_with_nested_constructors(node).first.source_range)
             end
 
             return
