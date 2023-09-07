@@ -96,6 +96,30 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
         end
       RUBY
     end
+
+    it do
+      expect_offense(<<~RUBY)
+        class AnyService
+        ^^^^^^^^^^^^^^^^ please include ServiceBase into a service class
+          def call
+            puts('123')
+          end
+
+          def self.call
+            new.call
+          end
+        end
+      RUBY
+
+      expect_correction(<<~RUBY)
+        class AnyService
+          
+          def call
+            puts('123')
+          end
+        end
+      RUBY
+    end
   end
 
   context 'without offense' do
