@@ -30,7 +30,7 @@ module RuboCop
         def_node_search :self_call_with_arg_declaration, '(defs self :call (args _ ...) ...)'
         def_node_search :self_call_declarations, '(defs self :call (args) ...)'
         def_node_search :self_call_with_nested_constructors_with_arg,
-                        '(defs self :call (args) (send (send nil? :new _ ...) :call))'
+                        '(defs self :call (args) `(send (send nil? :new _ ...) :call))'
         def_node_search :self_call_with_nested_constructors, '(defs self :call (args) (send (send nil? :new) :call))'
         def_node_search :include_service_base, '(send nil? :include (const _ :ServiceBase))'
 

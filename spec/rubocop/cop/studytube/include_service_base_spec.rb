@@ -188,6 +188,7 @@ RSpec.describe RuboCop::Cop::Studytube::IncludeServiceBase, :config do
         class AnyService
           def self.call
             new(arg).call
+            new(foo: :bar).call
           end
         end
       RUBY
