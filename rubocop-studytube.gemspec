@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'rubocop-studytube'
-  s.version     = '0.0.3'
+  s.version     = '0.0.4'
   s.summary     = "Studytube's rubocop rules"
   s.required_ruby_version = '>= 2.7.0'
   s.description = "A set of rubocop rules for studytube's codebase"
